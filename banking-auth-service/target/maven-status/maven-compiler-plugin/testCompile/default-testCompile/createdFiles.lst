@@ -1,0 +1,4 @@
+com\example\auth\service\UserServiceTest.class
+com\example\auth\repository\UserRepositoryTest.class
+com\example\auth\controller\AuthControllerTest.class
+com\example\auth\model\AccountTest.class
