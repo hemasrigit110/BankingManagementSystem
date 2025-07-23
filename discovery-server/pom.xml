@@ -8,7 +8,6 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.5.3</version>
-        <!--  Compatible with Spring Cloud 2022.0.4 -->
         <relativePath/>
     </parent>
 
@@ -30,7 +29,7 @@
             <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
         </dependency>
 
-        <!-- Spring Web (for embedded Tomcat and endpoints) -->
+        <!-- Spring Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -48,5 +47,24 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <!-- ✅ ADD THIS SECTION -->
+    <build>
+        <plugins>
+            <!-- Spring Boot Plugin for building executable JARs -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.2.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal> <!-- Important for runnable JAR -->
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
