@@ -5,9 +5,9 @@ spring:
   application:
     name: transaction-service
   datasource:
-    url: jdbc:mysql://localhost:3306/auth_db
+    url: jdbc:mysql://http://15.206.89.177:3306/auth_db
     username: root
-    password: Password
+    password: Password@11
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
