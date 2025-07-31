@@ -1,1 +1,3 @@
+com\example\auth\service\AuthServiceImplTest.class
+com\example\auth\repository\UserRepositoryTest.class
 com\example\auth\security\JwtUtilTest.class
