@@ -1,3 +1,2 @@
-com\example\account\exception\ResourceNotFoundExceptionTest.class
 com\example\account\repository\AccountRepositoryTest.class
 com\example\account\service\AccountServiceImplTest.class

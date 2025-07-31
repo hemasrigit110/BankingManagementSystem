@@ -1,46 +1,47 @@
 package com.example.auth.repository;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
+import com.example.auth.model.User;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
-class UserRepositoryTest {
+@SpringBootTest
+@Transactional  // Ensures changes are rolled back after each test
+public class UserRepositoryTest {
 
+    @Autowired
     private UserRepository userRepository;
 
-    @BeforeEach
-    void setUp() {
-        // Properly mock the UserRepository
-        userRepository = Mockito.mock(UserRepository.class);
+    @Test
+    public void testSaveAndFindByUsername() {
+        User user = new User();
+        user.setUsername("testuser");
+        user.setPassword("testpass");
+
+        userRepository.save(user);
+        Optional<User> foundUser = userRepository.findByUsername("testuser");
+
+        assertTrue(foundUser.isPresent());
+        assertEquals("testuser", foundUser.get().getUsername());
     }
 
     @Test
-    @DisplayName("existsByUsername returns true when username exists")
-    void existsByUsernameReturnsTrueWhenUsernameExists() {
-        String username = "existingUser";
+    public void testExistsByUsername() {
+        User user = new User();
+        user.setUsername("uniqueuser");
+        user.setPassword("secret");
 
-        when(userRepository.existsByUsername(username)).thenReturn(true);
+        userRepository.save(user);
 
-        Boolean result = userRepository.existsByUsername(username);
+        boolean exists = userRepository.existsByUsername("uniqueuser");
+        assertTrue(exists);
 
-        assertTrue(result);
-        verify(userRepository, times(1)).existsByUsername(username);
-    }
-
-    @Test
-    @DisplayName("existsByUsername returns false when username does not exist")
-    void existsByUsernameReturnsFalseWhenUsernameDoesNotExist() {
-        String username = "nonExistentUser";
-
-        when(userRepository.existsByUsername(username)).thenReturn(false);
-
-        Boolean result = userRepository.existsByUsername(username);
-
-        assertFalse(result);
-        verify(userRepository, times(1)).existsByUsername(username);
+        boolean notExists = userRepository.existsByUsername("nonexistent");
+        assertFalse(notExists);
     }
 }

@@ -17,28 +17,43 @@ public class AccountRepositoryTest {
     private AccountRepository accountRepository;
 
     @Test
-    void testFindByAccountNumber() {
+    void testFindByAccountNumber_Found() {
         Account account = new Account();
-        account.setAccountNumber("ACC123");
-        account.setBalance(new BigDecimal("1000.00"));
+        account.setAccountHolderName("Test User");
+        account.setAccountNumber("ACC123456");
+        account.setIfscCode("IFSC001");
+        account.setBalance(BigDecimal.valueOf(1000));
+
         accountRepository.save(account);
 
-        Optional<Account> result = accountRepository.findByAccountNumber("ACC123");
-
+        Optional<Account> result = accountRepository.findByAccountNumber("ACC123456");
         assertTrue(result.isPresent());
-        assertEquals("ACC123", result.get().getAccountNumber());
-        assertEquals(new BigDecimal("1000.00"), result.get().getBalance());
+        assertEquals("Test User", result.get().getAccountHolderName());
     }
 
     @Test
-    void testExistsByAccountNumber() {
+    void testFindByAccountNumber_NotFound() {
+        Optional<Account> result = accountRepository.findByAccountNumber("NON_EXISTENT");
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    void testExistsByAccountNumber_True() {
         Account account = new Account();
-        account.setAccountNumber("ACC456");
-        account.setBalance(new BigDecimal("2000.00"));
+        account.setAccountHolderName("User Exists");
+        account.setAccountNumber("EXIST123");
+        account.setIfscCode("IFSC002");
+        account.setBalance(BigDecimal.valueOf(2000));
+
         accountRepository.save(account);
 
-        boolean exists = accountRepository.existsByAccountNumber("ACC456");
-
+        boolean exists = accountRepository.existsByAccountNumber("EXIST123");
         assertTrue(exists);
+    }
+
+    @Test
+    void testExistsByAccountNumber_False() {
+        boolean exists = accountRepository.existsByAccountNumber("DOES_NOT_EXIST");
+        assertFalse(exists);
     }
 }

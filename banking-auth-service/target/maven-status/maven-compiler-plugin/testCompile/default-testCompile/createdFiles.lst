@@ -1,4 +1,1 @@
-com\example\auth\service\UserServiceTest.class
-com\example\auth\repository\UserRepositoryTest.class
-com\example\auth\model\AccountTest.class
-com\example\auth\exception\InvalidCredentialsExceptionTest.class
+com\example\auth\security\JwtUtilTest.class

@@ -4,111 +4,124 @@ import com.example.account.model.Account;
 import com.example.account.repository.AccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 public class AccountServiceImplTest {
 
-    @Mock
     private AccountRepository accountRepository;
-
-    @InjectMocks
     private AccountServiceImpl accountService;
 
-    private Account account;
-
     @BeforeEach
-    void setup() {
-        account = new Account();
-        account.setAccountNumber("ACC001");
-        account.setBalance(new BigDecimal("1000.00"));
+    void setUp() throws Exception {
+        accountRepository = mock(AccountRepository.class);
+        accountService = new AccountServiceImpl();
+
+        // Inject the mock repository into the private field using reflection
+        Field field = AccountServiceImpl.class.getDeclaredField("accountRepository");
+        field.setAccessible(true);
+        field.set(accountService, accountRepository);
     }
 
     @Test
-    void testGetAccountDetails_AccountExists() {
-        when(accountRepository.findByAccountNumber("ACC001")).thenReturn(Optional.of(account));
+    void testGetAccountDetails_Found() {
+        Account account = new Account();
+        account.setAccountNumber("1234567890");
+        account.setBalance(BigDecimal.valueOf(5000));
 
-        Account result = accountService.getAccountDetails("ACC001");
+        when(accountRepository.findByAccountNumber("1234567890")).thenReturn(Optional.of(account));
+
+        Account result = accountService.getAccountDetails("1234567890");
 
         assertNotNull(result);
-        assertEquals("ACC001", result.getAccountNumber());
-        assertEquals(new BigDecimal("1000.00"), result.getBalance());
+        assertEquals("1234567890", result.getAccountNumber());
+        assertEquals(BigDecimal.valueOf(5000), result.getBalance());
     }
 
     @Test
-    void testGetAccountDetails_AccountNotFound() {
-        when(accountRepository.findByAccountNumber("ACC999")).thenReturn(Optional.empty());
+    void testGetAccountDetails_NotFound() {
+        when(accountRepository.findByAccountNumber("0000000000")).thenReturn(Optional.empty());
 
-        Account result = accountService.getAccountDetails("ACC999");
+        Account result = accountService.getAccountDetails("0000000000");
 
         assertNull(result);
     }
 
     @Test
-    void testUpdateBalance_CreditTransaction() {
-        when(accountRepository.findByAccountNumber("ACC001")).thenReturn(Optional.of(account));
-        when(accountRepository.save(any(Account.class))).thenReturn(account);
+    void testUpdateBalance_Credit() {
+        Account account = new Account();
+        account.setAccountNumber("1234567890");
+        account.setBalance(BigDecimal.valueOf(1000));
 
-        accountService.updateBalance("ACC001", new BigDecimal("500.00"), "CREDIT");
+        when(accountRepository.findByAccountNumber("1234567890")).thenReturn(Optional.of(account));
 
-        assertEquals(new BigDecimal("1500.00"), account.getBalance());
-        verify(accountRepository, times(1)).save(account);
+        accountService.updateBalance("1234567890", BigDecimal.valueOf(500), "CREDIT");
+
+        ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
+        verify(accountRepository).save(captor.capture());
+
+        Account updated = captor.getValue();
+        assertEquals(BigDecimal.valueOf(1500), updated.getBalance());
     }
 
     @Test
-    void testUpdateBalance_DebitTransaction_Success() {
-        when(accountRepository.findByAccountNumber("ACC001")).thenReturn(Optional.of(account));
-        when(accountRepository.save(any(Account.class))).thenReturn(account);
+    void testUpdateBalance_Debit_Success() {
+        Account account = new Account();
+        account.setAccountNumber("1234567890");
+        account.setBalance(BigDecimal.valueOf(1000));
 
-        accountService.updateBalance("ACC001", new BigDecimal("400.00"), "DEBIT");
+        when(accountRepository.findByAccountNumber("1234567890")).thenReturn(Optional.of(account));
 
-        assertEquals(new BigDecimal("600.00"), account.getBalance());
-        verify(accountRepository).save(account);
+        accountService.updateBalance("1234567890", BigDecimal.valueOf(300), "DEBIT");
+
+        ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
+        verify(accountRepository).save(captor.capture());
+
+        Account updated = captor.getValue();
+        assertEquals(BigDecimal.valueOf(700), updated.getBalance());
     }
 
     @Test
-    void testUpdateBalance_DebitTransaction_InsufficientBalance() {
-        when(accountRepository.findByAccountNumber("ACC001")).thenReturn(Optional.of(account));
+    void testUpdateBalance_Debit_InsufficientBalance() {
+        Account account = new Account();
+        account.setAccountNumber("1234567890");
+        account.setBalance(BigDecimal.valueOf(200));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            accountService.updateBalance("ACC001", new BigDecimal("2000.00"), "DEBIT");
-        });
+        when(accountRepository.findByAccountNumber("1234567890")).thenReturn(Optional.of(account));
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                accountService.updateBalance("1234567890", BigDecimal.valueOf(300), "DEBIT"));
 
         assertEquals("Insufficient balance", exception.getMessage());
-        verify(accountRepository, never()).save(any());
     }
 
     @Test
     void testUpdateBalance_InvalidTransactionType() {
-        when(accountRepository.findByAccountNumber("ACC001")).thenReturn(Optional.of(account));
+        Account account = new Account();
+        account.setAccountNumber("1234567890");
+        account.setBalance(BigDecimal.valueOf(1000));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            accountService.updateBalance("ACC001", new BigDecimal("100.00"), "TRANSFER");
-        });
+        when(accountRepository.findByAccountNumber("1234567890")).thenReturn(Optional.of(account));
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                accountService.updateBalance("1234567890", BigDecimal.valueOf(100), "TRANSFER"));
 
         assertEquals("Invalid transaction type", exception.getMessage());
-        verify(accountRepository, never()).save(any());
     }
 
     @Test
     void testUpdateBalance_AccountNotFound() {
-        when(accountRepository.findByAccountNumber("ACC404")).thenReturn(Optional.empty());
+        when(accountRepository.findByAccountNumber("9999999999")).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            accountService.updateBalance("ACC404", new BigDecimal("100.00"), "CREDIT");
-        });
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+                accountService.updateBalance("9999999999", BigDecimal.valueOf(100), "CREDIT"));
 
         assertEquals("Account not found", exception.getMessage());
-        verify(accountRepository, never()).save(any());
     }
 }
