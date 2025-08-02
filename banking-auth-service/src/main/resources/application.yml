@@ -11,7 +11,7 @@ spring:
     name: auth-service
 
   datasource:
-    url: jdbc:mysql://localhost:3306/auth_db
+    url: jdbc:mysql://13.201.177.37:3306/auth_db
     username: root
     password: Password@11
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -20,7 +20,7 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.MariaDBDialect
 
   main:
     allow-bean-definition-overriding: true
@@ -28,7 +28,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://65.1.91.144:8761/eureka
+      defaultZone: http://13.201.177.37:8761/eureka
   instance:
     prefer-ip-address: true
 
