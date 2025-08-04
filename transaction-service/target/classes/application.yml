@@ -6,7 +6,7 @@ spring:
     name: transaction-service
 
   datasource:
-    url: jdbc:mysql://13.201.177.37:3306/auth_db
+    url: jdbc:mysql://13.200.231.194:3306/auth_db
     username: root
     password: Password@11
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -19,4 +19,4 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://13.201.177.37:8761/eureka
+      defaultZone: http://13.200.231.194:8761/eureka
